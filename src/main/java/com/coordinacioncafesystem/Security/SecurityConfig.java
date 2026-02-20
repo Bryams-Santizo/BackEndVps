@@ -32,18 +32,29 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // 🔹 Permitir preflight CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 🔹 Endpoints públicos específicos (del código nuevo)
                         .requestMatchers(HttpMethod.POST, "/api/asistencia/solicitar").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/asistencia/pendientes").permitAll()
                         .requestMatchers("/api/transferencias/**").permitAll()
+                        .requestMatchers("/api/capacitaciones/**").permitAll()
+                        .requestMatchers("/api/roles/**").permitAll()
+                        .requestMatchers("/api/inscripciones/**").permitAll()
+                        .requestMatchers("/api/colaboraciones/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/galeria/tecnologico/**").permitAll()
+
+                        // 🔹 Estructura original (la dejamos intacta)
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/public/**",          // API pública
-                                "/api/media/view/**",      // ver archivos (inline)
-                                "/api/media/download/**",  // descargar archivos
+                                "/api/public/**",
+                                "/api/media/view/**",
+                                "/api/media/download/**",
                                 "/api/media/por-proyecto/**",
-                                "/api/media/upload/**",    // ⬅ subir archivos
-                                "/api/proyectos/**",       // ⬅ CRUD de proyectos
+                                "/api/media/upload/**",
+                                "/api/proyectos/**",
                                 "/api/estadisticas/**",
                                 "/public/**",
                                 "/v3/api-docs/**",
@@ -55,13 +66,14 @@ public class SecurityConfig {
                                 "/api/tecnologicos/**",
                                 "/api/asistencia/**",
                                 "/api/media/**"
-
                         ).permitAll()
-                        // 🔐 EVENTOS (CRUD PROTEGIDO)
+
+                        // 🔐 EVENTOS PROTEGIDOS
                         .requestMatchers(HttpMethod.GET, "/api/eventos/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/eventos/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/eventos/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
