@@ -2,6 +2,8 @@ package com.coordinacioncafesystem.Entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "productores")
 public class Productores {
@@ -9,42 +11,90 @@ public class Productores {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre;
+    private String nombreProductor;
+    private String nombreFinca;
     private String ubicacion;
     private Double hectareas;
-    private String tipoCafe;
-    private String telefono;
-    private String correo;
+    private Integer altitudPromedio;
+    private Double volumenProduccion;
+    private String variedades;
 
-    // Cada productor puede estar vinculado a un tecnológico (por convenio)
-    @ManyToOne
-    @JoinColumn(name = "tecnologico_id")
-    private Organizacion tecnologico;
 
-    public Productores() {}
+    @OneToMany(mappedBy = "productor", cascade = CascadeType.ALL)
+    private List<ResultadoEvaluacion> evaluaciones;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    //Getters and Setters//
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getUbicacion() { return ubicacion; }
-    public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
+    public Long getId() {
+        return id;
+    }
 
-    public Double getHectareas() { return hectareas; }
-    public void setHectareas(Double hectareas) { this.hectareas = hectareas; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getTipoCafe() { return tipoCafe; }
-    public void setTipoCafe(String tipoCafe) { this.tipoCafe = tipoCafe; }
+    public String getNombreProductor() {
+        return nombreProductor;
+    }
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public void setNombreProductor(String nombreProductor) {
+        this.nombreProductor = nombreProductor;
+    }
 
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public String getNombreFinca() {
+        return nombreFinca;
+    }
 
-    public Organizacion getTecnologico() { return tecnologico; }
-    public void setTecnologico(Organizacion tecnologico) { this.tecnologico = tecnologico; }
+    public void setNombreFinca(String nombreFinca) {
+        this.nombreFinca = nombreFinca;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
+    }
+
+    public Double getHectareas() {
+        return hectareas;
+    }
+
+    public void setHectareas(Double hectareas) {
+        this.hectareas = hectareas;
+    }
+
+    public Integer getAltitudPromedio() {
+        return altitudPromedio;
+    }
+
+    public void setAltitudPromedio(Integer altitudPromedio) {
+        this.altitudPromedio = altitudPromedio;
+    }
+
+    public Double getVolumenProduccion() {
+        return volumenProduccion;
+    }
+
+    public void setVolumenProduccion(Double volumenProduccion) {
+        this.volumenProduccion = volumenProduccion;
+    }
+
+    public String getVariedades() {
+        return variedades;
+    }
+
+    public void setVariedades(String variedades) {
+        this.variedades = variedades;
+    }
+
+    public List<ResultadoEvaluacion> getEvaluaciones() {
+        return evaluaciones;
+    }
+
+    public void setEvaluaciones(List<ResultadoEvaluacion> evaluaciones) {
+        this.evaluaciones = evaluaciones;
+    }
 }
-
