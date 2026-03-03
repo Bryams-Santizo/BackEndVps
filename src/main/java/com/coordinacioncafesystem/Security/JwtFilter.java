@@ -36,17 +36,18 @@ public class JwtFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         // 🔓 RUTAS PÚBLICAS: el filtro NO debe intentar validar JWT aquí
-        if (uri.startsWith("/api/public/")
-                || uri.startsWith("/api/media/view/")
-                || uri.startsWith("/api/media/download/")
-                || uri.startsWith("/v3/api-docs")
+// 🔓 RUTAS PÚBLICAS: el filtro NO debe intentar validar JWT aquí
+if (uri.startsWith("/api/public/")
+        || uri.startsWith("/api/media/view/")
+        || uri.startsWith("/api/media/download/")
+        || uri.startsWith("/api/uploads/")
+        || uri.startsWith("/uploads/")
+        || uri.startsWith("/v3/api-docs")
+        || uri.startsWith("/swagger-ui")) {
 
-                || uri.startsWith("/swagger-ui")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-
+    filterChain.doFilter(request, response);
+    return;
+}
         final String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
             // sin token → simplemente deja pasar; luego SecurityConfig decide si requiere auth

@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# uploads runtime files
+uploads/
+uploads.bak*/
