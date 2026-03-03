@@ -36,5 +36,3 @@ public class AsistenciaController {
         return asistenciaService.listarSolicitudesPendientes();
     }
 }
-
-
