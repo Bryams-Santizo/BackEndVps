@@ -17,6 +17,7 @@ public class Asistencia {
     @Column(columnDefinition = "TEXT")
     private String problemaEspecifico;
     private String ubicacion;
+    private String telefono;
 
     // --- DATOS DEL VÍNCULO (Nuevos campos clave) ---
     private Long institucionId;     // El ID de la tabla Empresa, Gobierno u Org.
@@ -29,6 +30,8 @@ public class Asistencia {
 
     // Estatus: PENDIENTE o VINCULADO
     private String estatus = "PENDIENTE";
+
+    private String emailSolicitante;
 
     // Getters y Setters...
 
@@ -119,5 +122,22 @@ public class Asistencia {
 
     public void setEstatus(String estatus) {
         this.estatus = estatus;
+    }
+
+    public String getEmailSolicitante() {
+        return emailSolicitante;
+    }
+
+    public void setEmailSolicitante(String emailSolicitante) {
+        this.emailSolicitante = emailSolicitante;
+    }
+
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 }
