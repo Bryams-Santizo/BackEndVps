@@ -78,7 +78,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- 🔐 JSON Web Token (JJWT) -->
+		<!--  JSON Web Token (JJWT) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
