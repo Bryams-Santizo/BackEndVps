@@ -1,9 +1,11 @@
 package com.coordinacioncafesystem.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "colaboraciones")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Colaboracion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

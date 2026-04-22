@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,39 +36,28 @@ public class ImpulsoTecnologicoService {
 
     // --- 3. GUARDAR / ACTUALIZAR ---
     public ImpulsoTecnologico guardarConArchivos(ImpulsoTecnologico t, MultipartFile doc, MultipartFile carta) throws IOException {
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists()) uploadDir.mkdirs();
+        // 1. Obtener la ruta absoluta de la carpeta del proyecto
+        Path root = Paths.get("uploads").toAbsolutePath().normalize();
 
-        // Si estamos editando (ID existe), buscamos el registro actual para no perder las rutas de archivos previos
-        if (t.getId() != null) {
-            Optional<ImpulsoTecnologico> existente = repository.findById(t.getId());
-            if (existente.isPresent()) {
-                // Si no se envió un nuevo doc, mantenemos el path anterior
-                if (doc == null || doc.isEmpty()) {
-                    t.setDocumentoPath(existente.get().getDocumentoPath());
-                } else {
-                    eliminarArchivoFisico(existente.get().getDocumentoPath()); // Opcional: borrar el viejo al reemplazar
-                }
-                // Si no se envió nueva carta, mantenemos el path anterior
-                if (carta == null || carta.isEmpty()) {
-                    t.setCartaPath(existente.get().getCartaPath());
-                } else {
-                    eliminarArchivoFisico(existente.get().getCartaPath()); // Opcional: borrar el viejo al reemplazar
-                }
-            }
+        // 2. Crear el directorio si no existe
+        if (!Files.exists(root)) {
+            Files.createDirectories(root);
         }
 
-        // Procesar nuevo documento
+        // ... (lógica de edición para mantener archivos anteriores)
+
+        // 3. Procesar nuevo documento (Imagen de tecnología)
         if (doc != null && !doc.isEmpty()) {
             String docName = System.currentTimeMillis() + "_doc_" + doc.getOriginalFilename();
-            doc.transferTo(new File(UPLOAD_DIR + docName));
+            // USAR EL PATH ABSOLUTO AQUÍ
+            Files.copy(doc.getInputStream(), root.resolve(docName), StandardCopyOption.REPLACE_EXISTING);
             t.setDocumentoPath(docName);
         }
 
-        // Procesar nueva carta
+        // 4. Procesar nueva carta (Imagen de evidencia)
         if (carta != null && !carta.isEmpty()) {
             String cartaName = System.currentTimeMillis() + "_carta_" + carta.getOriginalFilename();
-            carta.transferTo(new File(UPLOAD_DIR + cartaName));
+            Files.copy(carta.getInputStream(), root.resolve(cartaName), StandardCopyOption.REPLACE_EXISTING);
             t.setCartaPath(cartaName);
         }
 

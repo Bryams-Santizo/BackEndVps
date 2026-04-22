@@ -18,6 +18,8 @@ import com.itextpdf.text.Chunk;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import java.util.Locale;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +34,7 @@ public class EvaluacionService {
     @Autowired private ProductorRepository productorRepo;
     @Autowired private CertificacionRepository certificacionRepo;
 
-    public ResultadoEvaluacion procesarTest(Long productorId, Long certificacionId, int aciertos, int total) {
+    public ResultadoEvaluacion procesarTest(Long productorId, Long certificacionId, int aciertos, int total, String recomendacionesFaltantes) {
         Productores productor = productorRepo.findById(productorId).orElseThrow();
         Certificacion certificacion = certificacionRepo.findById(certificacionId).orElseThrow();
 
@@ -40,21 +42,21 @@ public class EvaluacionService {
 
         ResultadoEvaluacion eval = new ResultadoEvaluacion();
         eval.setProductor(productor);
-
-        // CORRECCIÓN: variable en minúscula
         eval.setCertificacionEvaluada(certificacion);
         eval.setPorcentajeCumplimiento(porcentaje);
 
-        if(porcentaje >= 80) {
-            eval.setRecomendacionesGeneradas("Estás muy cerca de la certificación. Mantén tus registros al día.");
+        if(porcentaje >= 90) {
+            eval.setRecomendacionesGeneradas("Felicidades, nivel de cumplimiento óptimo. Sugerencias: " + recomendacionesFaltantes);
         } else {
-            eval.setRecomendacionesGeneradas("Necesitas mejorar la gestión de residuos y la trazabilidad documental.");
+            eval.setRecomendacionesGeneradas("Para cumplir una certificación, usted debe:\n- " + recomendacionesFaltantes);
         }
 
         return evaluacionRepo.save(eval);
     }
 
     public byte[] generarReportePDF(Long evaluacionId) {
+
+
         ResultadoEvaluacion eval = evaluacionRepo.findById(evaluacionId).orElseThrow();
 
         Document document = new Document();
@@ -65,7 +67,7 @@ public class EvaluacionService {
             document.open();
 
             Font fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, BaseColor.BLUE);
-            Paragraph titulo = new Paragraph("Reporte de Simulación ADICAM", fontTitulo);
+            Paragraph titulo = new Paragraph("Reporte de Certificacion ADICAM", fontTitulo);
             titulo.setAlignment(Element.ALIGN_CENTER);
             document.add(titulo);
             document.add(Chunk.NEWLINE);
@@ -81,7 +83,9 @@ public class EvaluacionService {
             document.add(Chunk.NEWLINE);
 
             Font fontResult = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.DARK_GRAY);
-            document.add(new Paragraph("Nivel de Cumplimiento: " + eval.getPorcentajeCumplimiento() + "%", fontResult));
+            String porcentajeFormateado = String.format(Locale.GERMANY, "%.2f", eval.getPorcentajeCumplimiento());
+
+            document.add(new Paragraph("Nivel de Cumplimiento: " + porcentajeFormateado + "%", fontResult));
 
 
             document.add(new Paragraph("Recomendaciones: " + eval.getRecomendacionesGeneradas()));

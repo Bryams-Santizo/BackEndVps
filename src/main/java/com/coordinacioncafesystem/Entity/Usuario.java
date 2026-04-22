@@ -1,3 +1,6 @@
+// ===============================
+// Usuario.java (COMPLETO)
+// ===============================
 package com.coordinacioncafesystem.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -23,10 +26,10 @@ public class Usuario implements UserDetails {
     private String nombre;
 
     @Column(nullable = false, unique = true)
-    private String correo;   // usuario
+    private String correo;
 
     @Column(nullable = false)
-    private String password; // contraseña
+    private String password;
 
     private Boolean activo = true;
 
@@ -36,7 +39,6 @@ public class Usuario implements UserDetails {
     @JoinColumn(name = "rol_id")
     private Rol rol;
 
-    // 👇 Aquí ligamos al Tecnológico
     @ManyToOne
     @JoinColumn(name = "tecnologico_id")
     private Tecnologicos tecnologico;
@@ -70,12 +72,15 @@ public class Usuario implements UserDetails {
 
     // =================== UserDetails ===================
 
-    // 👇 No exponer authorities en JSON (aquí se arma el GrantedAuthority)
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (rol == null) return Collections.emptyList();
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
+        if (rol == null || rol.getNombre() == null) return Collections.emptyList();
+
+        // ✅ Spring espera ROLE_XXX para hasRole("XXX")
+        return Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + rol.getNombre().toUpperCase())
+        );
     }
 
     @Override
@@ -83,7 +88,6 @@ public class Usuario implements UserDetails {
         return this.correo;
     }
 
-    // 👇 No exponer la password en las respuestas JSON
     @Override
     @JsonIgnore
     public String getPassword() {
@@ -104,5 +108,7 @@ public class Usuario implements UserDetails {
 
     @Override
     @JsonIgnore
-    public boolean isEnabled() { return this.activo != null ? this.activo : false; }
+    public boolean isEnabled() {
+        return this.activo != null ? this.activo : false;
+    }
 }

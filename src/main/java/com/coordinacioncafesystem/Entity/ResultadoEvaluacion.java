@@ -23,7 +23,10 @@ public class ResultadoEvaluacion {
     private Certificacion certificacionEvaluada;
 
     private Double porcentajeCumplimiento;
+
+    @Column(columnDefinition = "TEXT")
     private String recomendacionesGeneradas; // Tú lo llamaste así, lo mantendremos
+
     private LocalDate fechaEvaluacion = LocalDate.now(); // Mejor inicializarlo
 
     // Getters y Setters...
@@ -42,4 +45,6 @@ public class ResultadoEvaluacion {
     public void setRecomendacionesGeneradas(String recomendacionesGeneradas) { this.recomendacionesGeneradas = recomendacionesGeneradas; }
     public LocalDate getFechaEvaluacion() { return fechaEvaluacion; }
     public void setFechaEvaluacion(LocalDate fechaEvaluacion) { this.fechaEvaluacion = fechaEvaluacion; }
+
+
 }

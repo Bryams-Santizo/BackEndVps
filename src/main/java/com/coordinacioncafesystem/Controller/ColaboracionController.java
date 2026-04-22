@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @RestController
@@ -29,31 +30,27 @@ public class ColaboracionController {
     @PostMapping
     public ResponseEntity<Colaboracion> guardar(
             @RequestPart("colaboracion") String colaboracionJson,
-            @RequestPart(value = "fileDocumento", required = false) MultipartFile fileDoc,
-            @RequestPart(value = "fileCarta", required = false) MultipartFile fileCarta
+            @RequestPart(value = "fileDocumento", required = false) MultipartFile fileImg, // Imagen
+            @RequestPart(value = "fileCarta", required = false) MultipartFile filePdf    // PDF
     ) throws Exception {
-
         ObjectMapper objectMapper = new ObjectMapper();
         Colaboracion colaboracion = objectMapper.readValue(colaboracionJson, Colaboracion.class);
 
-        Path root = Paths.get("uploads");
-        if (!Files.exists(root)) {
-            Files.createDirectories(root);
+        Path root = Paths.get("uploads").toAbsolutePath().normalize();
+        if (!Files.exists(root)) Files.createDirectories(root);
+
+        // Guardar Imagen (DocumentosAdjuntos)
+        if (fileImg != null && !fileImg.isEmpty()) {
+            String nombreImg = System.currentTimeMillis() + "_img_" + fileImg.getOriginalFilename().replaceAll("[^a-zA-Z0-9.]", "_");
+            Files.copy(fileImg.getInputStream(), root.resolve(nombreImg), StandardCopyOption.REPLACE_EXISTING);
+            colaboracion.setDocumentosAdjuntos(nombreImg);
         }
 
-        if (fileDoc != null && !fileDoc.isEmpty()) {
-            // Limpiamos el nombre: quitamos espacios y caracteres raros
-            String nombreOriginal = fileDoc.getOriginalFilename() != null ? fileDoc.getOriginalFilename() : "archivo";
-            String nombreFinal = System.currentTimeMillis() + "_" + nombreOriginal.replaceAll("[^a-zA-Z0-9.]", "_");
-            Files.copy(fileDoc.getInputStream(), root.resolve(nombreFinal));
-            colaboracion.setDocumentosAdjuntos(nombreFinal);
-        }
-
-        if (fileCarta != null && !fileCarta.isEmpty()) {
-            String nombreOriginal = fileCarta.getOriginalFilename() != null ? fileCarta.getOriginalFilename() : "carta";
-            String nombreFinal = System.currentTimeMillis() + "_" + nombreOriginal.replaceAll("[^a-zA-Z0-9.]", "_");
-            Files.copy(fileCarta.getInputStream(), root.resolve(nombreFinal));
-            colaboracion.setCartaIntencion(nombreFinal);
+        // Guardar PDF (CartaIntencion)
+        if (filePdf != null && !filePdf.isEmpty()) {
+            String nombrePdf = System.currentTimeMillis() + "_doc_" + filePdf.getOriginalFilename().replaceAll("[^a-zA-Z0-9.]", "_");
+            Files.copy(filePdf.getInputStream(), root.resolve(nombrePdf), StandardCopyOption.REPLACE_EXISTING);
+            colaboracion.setCartaIntencion(nombrePdf);
         }
 
         return ResponseEntity.ok(service.guardar(colaboracion));
@@ -111,4 +108,5 @@ public class ColaboracionController {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+//si se pudo
 }

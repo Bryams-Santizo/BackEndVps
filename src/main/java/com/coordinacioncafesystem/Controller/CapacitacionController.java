@@ -1,9 +1,7 @@
 package com.coordinacioncafesystem.Controller;
 
 import com.coordinacioncafesystem.Entity.Capacitacion;
-import com.coordinacioncafesystem.Repository.CapacitacionRepository;
 import com.coordinacioncafesystem.Service.CapacitacionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +12,14 @@ import java.util.List;
 @CrossOrigin(origins = "${frontend.origin}")
 public class CapacitacionController {
 
-    @Autowired
-    private CapacitacionService service;
+    private final CapacitacionService service;
+
+    public CapacitacionController(CapacitacionService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public List<Capacitacion> obtenerCursos() {
-        // Podrías diferenciar aquí si es para el público o admin
         return service.listarPublicas();
     }
 
@@ -33,7 +33,6 @@ public class CapacitacionController {
     public ResponseEntity<Capacitacion> actualizar(@PathVariable Long id, @RequestBody Capacitacion detalles) {
         Capacitacion curso = service.buscarPorId(id);
 
-        // Sincronización completa de campos según tu interfaz de Angular
         curso.setNombre(detalles.getNombre());
         curso.setTipo(detalles.getTipo());
         curso.setDuracion(detalles.getDuracion());
@@ -54,8 +53,7 @@ public class CapacitacionController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        service.eliminar(id);
+        service.eliminarCascade(id); // ✅ primero borra inscripciones, luego capacitacion
         return ResponseEntity.noContent().build();
     }
-
 }

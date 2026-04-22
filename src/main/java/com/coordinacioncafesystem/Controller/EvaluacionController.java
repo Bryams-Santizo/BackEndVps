@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/evaluaciones")
@@ -20,12 +22,21 @@ public class EvaluacionController {
 
     // Recibe el examen terminado desde Angular (Paso 4)
     @PostMapping("/calcular")
-    public ResponseEntity<ResultadoEvaluacion> calcularTest(
-            @RequestParam Long productorId,
-            @RequestParam Long certificacionId,
-            @RequestParam int aciertos,
-            @RequestParam int total) {
-        return ResponseEntity.ok(evaluacionService.procesarTest(productorId, certificacionId, aciertos, total));
+    public ResponseEntity<ResultadoEvaluacion> calcularTest(@RequestBody Map<String, Object> payload) {
+        // Extraemos los datos del JSON enviado por Angular
+        Long productorId = Long.valueOf(payload.get("productorId").toString());
+        Long certificacionId = Long.valueOf(payload.get("certificacionId").toString());
+        int aciertos = (int) payload.get("aciertos");
+        int total = (int) payload.get("total");
+        String recomendaciones = (String) payload.get("recomendaciones");
+
+        return ResponseEntity.ok(evaluacionService.procesarTest(
+                productorId,
+                certificacionId,
+                aciertos,
+                total,
+                recomendaciones
+        ));
     }
 
     // Genera y descarga el PDF (Paso 5)

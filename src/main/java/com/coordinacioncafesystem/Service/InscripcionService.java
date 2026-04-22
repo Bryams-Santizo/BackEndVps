@@ -1,24 +1,25 @@
 package com.coordinacioncafesystem.Service;
 
-
 import com.coordinacioncafesystem.Dto.DatosAceptacionDTO;
 import com.coordinacioncafesystem.Entity.Inscripcion;
 import com.coordinacioncafesystem.Repository.InscripcionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 public class InscripcionService {
 
-    @Autowired
-    private InscripcionRepository repository;
+    private final InscripcionRepository repository;
+    private final JavaMailSender mailSender;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    public InscripcionService(InscripcionRepository repository, JavaMailSender mailSender) {
+        this.repository = repository;
+        this.mailSender = mailSender;
+    }
 
     public Inscripcion solicitarInscripcion(Inscripcion inscripcion) {
         inscripcion.setEstado("PENDIENTE");
@@ -39,16 +40,30 @@ public class InscripcionService {
         enviarCorreoConfirmacion(inscripcion, datos);
     }
 
+    // ✅ BORRAR INSCRIPCIONES DE UNA CAPACITACIÓN (para luego borrar la capacitación)
+    @Transactional
+    public long eliminarPorCapacitacion(Long capacitacionId) {
+        return repository.deleteByCapacitacionId(capacitacionId);
+    }
+
+    // Opcional: borrar una inscripción individual
+    public void eliminarInscripcion(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("No existe la inscripción con ID: " + id);
+        }
+        repository.deleteById(id);
+    }
+
     private void enviarCorreoConfirmacion(Inscripcion ins, DatosAceptacionDTO datos) {
         SimpleMailMessage message = new SimpleMailMessage();
 
-        // REMITENTE OFICIAL DEL SISTEMA
         message.setFrom("adicamsistema@gmail.com");
         message.setTo(ins.getEmailAlumno());
         message.setSubject("¡Inscripción Aceptada! - ADICAM");
 
+        String nombreCurso = (ins.getCapacitacion() != null) ? ins.getCapacitacion().getNombre() : "(curso)";
         String cuerpo = "Hola " + ins.getNombreAlumno() + ",\n\n" +
-                "Tu solicitud para el curso: '" + ins.getCapacitacion().getNombre() + "' ha sido APROBADA.\n\n" +
+                "Tu solicitud para el curso: '" + nombreCurso + "' ha sido APROBADA.\n\n" +
                 "--- DETALLES DEL EVENTO ---\n" +
                 "Fecha: " + datos.getFechaInicio() + "\n" +
                 "Hora: " + datos.getHora() + "\n" +
@@ -62,3 +77,4 @@ public class InscripcionService {
         mailSender.send(message);
     }
 }
+

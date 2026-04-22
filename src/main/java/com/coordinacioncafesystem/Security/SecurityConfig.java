@@ -27,108 +27,139 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
 
-                // Preflight
+                // =====================
+                // PRE-FLIGHT
+                // =====================
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // =====================
-                // ✅ RUTAS PÚBLICAS
+                // AUTH
                 // =====================
-
-                // Auth público
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/bolsa/**").permitAll()
 
-                // ✅ NUEVAS RUTAS PÚBLICAS (de la segunda config)
-                .requestMatchers("/api/capacitaciones/**").permitAll()
-                .requestMatchers("/api/roles/**").permitAll()
-                .requestMatchers("/api/inscripciones/**").permitAll()
-                .requestMatchers("/api/colaboraciones/**").permitAll()
-                .requestMatchers("/api/certificaciones/**").permitAll()
-                .requestMatchers("/api/productores/**").permitAll()
-                .requestMatchers("/api/evaluaciones/**").permitAll()
-
-                // API pública / docs
+                // =====================
+                // PUBLIC API
+                // =====================
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/api/bolsa/**").permitAll()
+
+                // =====================
+                // SWAGGER / DOCS
+                // =====================
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
 
-                // Proyectos públicos
+                // =====================
+                // EVENTOS / PROYECTOS PÚBLICOS
+                // =====================
+                .requestMatchers(HttpMethod.GET, "/api/eventos/latest/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/proyectos/latest").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/proyectos/latest/**").permitAll()
 
-                // Participantes públicos
+                // =====================
+                // PARTICIPANTES / GALERÍA
+                // =====================
                 .requestMatchers(HttpMethod.GET, "/api/participantes/**").permitAll()
-
-                // Galería pública
                 .requestMatchers(HttpMethod.GET, "/api/galeria/**").permitAll()
-                // ✅ Nuevo (más específico, de la segunda config)
                 .requestMatchers(HttpMethod.GET, "/api/galeria/tecnologico/**").permitAll()
 
-                // Eventos latest público
-                .requestMatchers(HttpMethod.GET, "/api/eventos/latest").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/eventos/latest/**").permitAll()
+                // =====================
+                // UPLOADS
+                // =====================
+                .requestMatchers(HttpMethod.GET, "/api/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/uploads/**").permitAll()
 
-                // Tecnológicos / asistencia / transferencias / estadísticas
+                // =====================
+                // MEDIA
+                // =====================
+                .requestMatchers(HttpMethod.GET, "/api/media/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/media/**").permitAll()
+                .requestMatchers("/api/media/view/**").permitAll()
+                .requestMatchers("/api/media/download/**").permitAll()
+                .requestMatchers("/api/media/por-proyecto/**").permitAll()
+
+                // =====================
+                // TECNOLÓGICOS / ASISTENCIA / TRANSFERENCIAS / ESTADÍSTICAS
+                // =====================
                 .requestMatchers("/api/tecnologicos/**").permitAll()
                 .requestMatchers("/api/asistencia/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/asistencia/solicitar").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/asistencia/pendientes").permitAll()
-                .requestMatchers("/api/transferencias/**").permitAll()
-                .requestMatchers("/api/estadisticas/**").permitAll()
-
-                // ✅ UPLOADS PÚBLICOS
-                .requestMatchers(HttpMethod.GET,  "/api/uploads/**").permitAll()
-                .requestMatchers(HttpMethod.HEAD, "/api/uploads/**").permitAll()
-                .requestMatchers(HttpMethod.GET,  "/uploads/**").permitAll()
-                .requestMatchers(HttpMethod.HEAD, "/uploads/**").permitAll()
-                // (en la segunda config también estaba /uploads/** permitAll; ya queda cubierto)
-
-                // ✅ MEDIA PÚBLICO (vista/descarga)
-                .requestMatchers(HttpMethod.GET,  "/api/media/**").permitAll()
-                .requestMatchers(HttpMethod.HEAD, "/api/media/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/estadisticas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/transferencias/**").permitAll()
 
                 // =====================
-                // 🔒 RUTAS PROTEGIDAS
+                // CAPACITACIONES
                 // =====================
+                .requestMatchers(HttpMethod.GET, "/api/capacitaciones/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/capacitaciones/**").hasAnyRole("ADMIN", "COORDINADOR")
+                .requestMatchers(HttpMethod.PUT, "/api/capacitaciones/**").hasAnyRole("ADMIN", "COORDINADOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/capacitaciones/**").hasAnyRole("ADMIN", "COORDINADOR")
 
-                // Media privado (upload/editar/borrar)
-                .requestMatchers(HttpMethod.POST,   "/api/media/**").authenticated()
-                .requestMatchers(HttpMethod.PUT,    "/api/media/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/media/**").authenticated()
+                // =====================
+                // OTRAS RUTAS PÚBLICAS
+                // =====================
+                .requestMatchers(HttpMethod.GET, "/api/colaboraciones/**").permitAll()
+                .requestMatchers("/api/roles/**").permitAll()
+                .requestMatchers("/api/inscripciones/**").permitAll()
+                .requestMatchers("/api/certificaciones/**").permitAll()
+                .requestMatchers("/api/productores/**").permitAll()
+                .requestMatchers("/api/evaluaciones/**").permitAll()
 
-                // Proyectos privados
-                .requestMatchers(HttpMethod.POST,   "/api/proyectos/**").authenticated()
-                .requestMatchers(HttpMethod.PUT,    "/api/proyectos/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/proyectos/**").authenticated()
-
-                // Eventos (CRUD protegido)
-                .requestMatchers(HttpMethod.GET,    "/api/eventos/**").authenticated()
-                .requestMatchers(HttpMethod.POST,   "/api/eventos/**").authenticated()
-                .requestMatchers(HttpMethod.PUT,    "/api/eventos/**").authenticated()
+                // =====================
+                // EVENTOS PRIVADOS
+                // =====================
+                .requestMatchers(HttpMethod.GET, "/api/eventos/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/eventos/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/eventos/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").authenticated()
 
-                // ✅ NUEVO: Galería (CRUD protegido) como en la segunda config
-                .requestMatchers(HttpMethod.POST,   "/api/galeria/**").authenticated()
-                .requestMatchers(HttpMethod.PUT,    "/api/galeria/**").authenticated()
+                // =====================
+                // GALERÍA PRIVADA (CRUD)
+                // =====================
+                .requestMatchers(HttpMethod.POST, "/api/galeria/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/galeria/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/galeria/**").authenticated()
 
+                // =====================
+                // MEDIA PRIVADA (UPLOAD / EDICIÓN / BORRADO)
+                // =====================
+                .requestMatchers(HttpMethod.POST, "/api/media/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/media/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/media/**").authenticated()
+
+                // =====================
+                // PROYECTOS PRIVADOS (CRUD)
+                // =====================
+                .requestMatchers(HttpMethod.POST, "/api/proyectos/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/proyectos/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/proyectos/**").authenticated()
+
+                // =====================
+                // RESTO
+                // =====================
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration c = new CorsConfiguration();
+
         c.setAllowedOriginPatterns(List.of(
             "http://localhost:4200",
             "http://127.0.0.1:4200",
@@ -137,6 +168,7 @@ public class SecurityConfig {
             "https://adicam.cloud",
             "https://www.adicam.cloud"
         ));
+
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         c.setAllowedHeaders(List.of("*"));
         c.setExposedHeaders(List.of("Content-Disposition"));
@@ -144,6 +176,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/**", c);
+
         return src;
     }
 
