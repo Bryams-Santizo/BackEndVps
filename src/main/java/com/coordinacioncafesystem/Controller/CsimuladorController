@@ -1,0 +1,25 @@
+package com.coordinacioncafesystem.Controller;
+
+import com.coordinacioncafesystem.Dto.ResultadoSimulacionDTO;
+import com.coordinacioncafesystem.Entity.Csimulador;
+import com.coordinacioncafesystem.Service.CsimuladorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/simulador")
+@CrossOrigin(origins = "${frontend.origin}")
+public class CsimuladorController {
+
+    @Autowired
+    private CsimuladorService simuladorService;
+
+
+    @PostMapping("/calcular")
+    public ResponseEntity<ResultadoSimulacionDTO> ejecutar(@RequestBody Csimulador datos) {
+        // Usamos el método calcular del service que ahora devuelve el DTO
+        ResultadoSimulacionDTO resultado = simuladorService.calcular(datos);
+        return ResponseEntity.ok(resultado);
+    }
+}
