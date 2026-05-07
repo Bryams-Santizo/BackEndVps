@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/api/bolsa/**").permitAll()
+                .requestMatchers("/api/simulador/**").permitAll()
 
                 // =====================
                 // SWAGGER / DOCS
