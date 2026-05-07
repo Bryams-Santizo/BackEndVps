@@ -1,0 +1,194 @@
+package com.coordinacioncafesystem.Entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+@Entity
+@Table(name = "simulaciones")
+public class Csimulador {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nombre;
+    private String cooperativa;
+    private String mercadoObjetivo;
+    private String segmento;
+    private Double volumenEntrada;
+    private String unidadVolumen;
+
+    // Resultados calculados
+    private Double inversionPuestaPunto;
+    private Double pesoFinal;
+    private Double utilidadADICAM;
+    private String viabilidad;
+
+
+    private String estadoInicial; // Cereza, Pergamino, Oro
+    private String presentacionVenta; // Tostado, etc.
+    private String tieneGNSS; // Si/No
+    private String tieneSuelo; // Si/No
+    private String puntoSalida; // Veracruz, etc.
+    private Double fleteTerrestre;
+    private Double costoMaquila;
+
+    @Column(name = "fecha_creacion")
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
+
+    // Getters y Setters...
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getCooperativa() {
+        return cooperativa;
+    }
+
+    public void setCooperativa(String cooperativa) {
+        this.cooperativa = cooperativa;
+    }
+
+    public String getMercadoObjetivo() {
+        return mercadoObjetivo;
+    }
+
+    public void setMercadoObjetivo(String mercadoObjetivo) {
+        this.mercadoObjetivo = mercadoObjetivo;
+    }
+
+    public String getSegmento() {
+        return segmento;
+    }
+
+    public void setSegmento(String segmento) {
+        this.segmento = segmento;
+    }
+
+    public Double getVolumenEntrada() {
+        return volumenEntrada;
+    }
+
+    public void setVolumenEntrada(Double volumenEntrada) {
+        this.volumenEntrada = volumenEntrada;
+    }
+
+    public String getUnidadVolumen() {
+        return unidadVolumen;
+    }
+
+    public void setUnidadVolumen(String unidadVolumen) {
+        this.unidadVolumen = unidadVolumen;
+    }
+
+    public Double getInversionPuestaPunto() {
+        return inversionPuestaPunto;
+    }
+
+    public void setInversionPuestaPunto(Double inversionPuestaPunto) {
+        this.inversionPuestaPunto = inversionPuestaPunto;
+    }
+
+    public Double getPesoFinal() {
+        return pesoFinal;
+    }
+
+    public void setPesoFinal(Double pesoFinal) {
+        this.pesoFinal = pesoFinal;
+    }
+
+    public Double getUtilidadADICAM() {
+        return utilidadADICAM;
+    }
+
+    public void setUtilidadADICAM(Double utilidadADICAM) {
+        this.utilidadADICAM = utilidadADICAM;
+    }
+
+    public String getViabilidad() {
+        return viabilidad;
+    }
+
+    public void setViabilidad(String viabilidad) {
+        this.viabilidad = viabilidad;
+    }
+
+    public String getEstadoInicial() {
+        return estadoInicial;
+    }
+
+    public void setEstadoInicial(String estadoInicial) {
+        this.estadoInicial = estadoInicial;
+    }
+
+    public String getPresentacionVenta() {
+        return presentacionVenta;
+    }
+
+    public void setPresentacionVenta(String presentacionVenta) {
+        this.presentacionVenta = presentacionVenta;
+    }
+
+    public String getTieneGNSS() {
+        return tieneGNSS;
+    }
+
+    public void setTieneGNSS(String tieneGNSS) {
+        this.tieneGNSS = tieneGNSS;
+    }
+
+    public String getTieneSuelo() {
+        return tieneSuelo;
+    }
+
+    public void setTieneSuelo(String tieneSuelo) {
+        this.tieneSuelo = tieneSuelo;
+    }
+
+    public String getPuntoSalida() {
+        return puntoSalida;
+    }
+
+    public void setPuntoSalida(String puntoSalida) {
+        this.puntoSalida = puntoSalida;
+    }
+
+    public Double getFleteTerrestre() {
+        return fleteTerrestre;
+    }
+
+    public void setFleteTerrestre(Double fleteTerrestre) {
+        this.fleteTerrestre = fleteTerrestre;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public Double getCostoMaquila() {
+        return costoMaquila;
+    }
+
+    public void setCostoMaquila(Double costoMaquila) {
+        this.costoMaquila = costoMaquila;
+    }
+}
