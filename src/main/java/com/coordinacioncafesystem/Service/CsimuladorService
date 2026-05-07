@@ -1,0 +1,158 @@
+package com.coordinacioncafesystem.Service;
+
+import com.coordinacioncafesystem.Dto.ResultadoSimulacionDTO;
+import com.coordinacioncafesystem.Entity.Csimulador;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CsimuladorService {
+
+    public Csimulador calcularYGuardar(Csimulador sim) {
+        double kilos = sim.getUnidadVolumen().equalsIgnoreCase("quintal") ?
+                sim.getVolumenEntrada() * 46 : sim.getVolumenEntrada();
+
+        double inversion = 0;
+        // Lógica de Inversión TecNM
+        // Ejemplo: Si el segmento es Especialidad, requiere Q-Grade (+$1900)
+        if (sim.getSegmento().equals("Especialidad")) inversion += 1900;
+        sim.setInversionPuestaPunto(inversion);
+
+        // Lógica de Mermas
+        double pesoFinal = kilos * 0.82; // Merma promedio del 18% (Trilla + Tostado)
+        sim.setPesoFinal(pesoFinal);
+
+        // Precios por Segmento (Aquí puedes consultar una tabla de precios en DB)
+        double precioKilo = obtenerPrecioPorSegmento(sim.getSegmento());
+
+        double utilidad = (pesoFinal * precioKilo) - inversion;
+        sim.setUtilidadADICAM(utilidad);
+
+        // Determinar Viabilidad
+        sim.setViabilidad(utilidad > 10000 ? "Verde" : "Amarillo");
+
+        // return repository.save(sim);
+        return sim;
+    }
+
+    public ResultadoSimulacionDTO calcular(Csimulador req) {
+        ResultadoSimulacionDTO res = new ResultadoSimulacionDTO();
+
+        // --- PUNTO 3: VOLUMEN Y MERMAS ---
+        double pesoInput = req.getUnidadVolumen().equalsIgnoreCase("quintal") ?
+                req.getVolumenEntrada() * 46 : req.getVolumenEntrada();
+        double pesoActual = pesoInput;
+
+        if ("Pergamino".equalsIgnoreCase(req.getEstadoInicial())) {
+            pesoActual = pesoActual * 0.80;
+        }
+        if ("Tostado".equalsIgnoreCase(req.getPresentacionVenta())) {
+            pesoActual = pesoActual * 0.82;
+        }
+        res.pesoFinal = pesoActual;
+
+        // --- PUNTO 2: INVERSIÓN PUESTA A PUNTO ---
+        double inversionTec = 0;
+        if ("No".equalsIgnoreCase(req.getTieneGNSS())) inversionTec += 1500;
+        if ("No".equalsIgnoreCase(req.getTieneSuelo())) inversionTec += 1500;
+        if ("Especialidad".equalsIgnoreCase(req.getSegmento()))
+            inversionTec += 1900;
+        res.inversionPuestaPunto = inversionTec;
+
+        // --- PUNTO 3: EMPAQUES ---
+        double costoEmpaque = 0;
+        if ("Tostado".equalsIgnoreCase(req.getPresentacionVenta())) {
+
+            costoEmpaque = pesoActual * 15;
+
+            // maquila adicional
+            double maquila = (req.getCostoMaquila() != null)
+                    ? req.getCostoMaquila()
+                    : 0;
+
+            costoEmpaque += pesoActual * maquila;
+
+        }
+        else {
+
+            double numSacos = Math.ceil(pesoActual / 69);
+
+            // YUTE BASE
+            costoEmpaque = numSacos * 45;
+
+            // SOLO EXPORTACIÓN PREMIUM/ESPECIALIDAD
+            if ("Internacional".equalsIgnoreCase(req.getMercadoObjetivo())
+                    &&
+                    ("Especialidad".equalsIgnoreCase(req.getSegmento())
+                            || "Premium".equalsIgnoreCase(req.getSegmento()))) {
+
+                costoEmpaque += numSacos * 100;
+            }
+        }
+
+        res.costoEmpaqueTotal = costoEmpaque;
+
+        // --- PUNTO 4: LOGÍSTICA ---
+        double flete = (req.getFleteTerrestre() != null) ? req.getFleteTerrestre() : 0;
+        double gastosSalida = flete;
+
+        if ("Internacional".equalsIgnoreCase(req.getMercadoObjetivo())) {
+            gastosSalida += 7500 + 200 + 717;
+        }
+        res.costoLogisticaTotal = gastosSalida;
+
+        if ("Veracruz".equalsIgnoreCase(req.getPuntoSalida())) {
+            res.sugerenciaRuta = "Ruta Transatlántica vía Puerto de Veracruz";
+        }
+        else if ("Lázaro Cárdenas".equalsIgnoreCase(req.getPuntoSalida())) {
+            res.sugerenciaRuta = "Ruta Pacífico vía Puerto Lázaro Cárdenas";
+        }
+        else {
+            res.sugerenciaRuta = "Conexión Terrestre vía Nuevo Laredo (USA)";
+        }
+
+        // --- PUNTO 5: DASHBOARD ---
+
+        double precioKgADICAM = obtenerPrecioPorSegmento(req.getSegmento());
+        double ingresoBrutoADICAM = pesoActual * precioKgADICAM;
+
+        res.utilidadTradicional = pesoInput * obtenerPrecioTradicional();
+
+        res.utilidadADICAM =
+                ingresoBrutoADICAM
+                        - inversionTec
+                        - costoEmpaque
+                        - gastosSalida;
+        // Semáforo
+        boolean faltaGNSS = "No".equalsIgnoreCase(req.getTieneGNSS());
+        boolean faltaSuelo = "No".equalsIgnoreCase(req.getTieneSuelo());
+
+        if (faltaGNSS && faltaSuelo) {
+            res.viabilidad = "Rojo";
+        }
+        else if (faltaGNSS || faltaSuelo) {
+            res.viabilidad = "Amarillo";
+        }
+        else {
+            res.viabilidad = "Verde";
+        }
+
+        return res;
+    }
+
+
+    private double obtenerPrecioPorSegmento(String segmento) {
+        switch(segmento) {
+            case "Volumen": return 77.18;
+            case "Certificado": return 81.03;
+            case "Organico": return 92.58;
+            case "Premium": return 94.50;
+            case "Especialidad": return 144.72;
+            case "Nicho": return 270.00;
+            default: return 77.18;
+        }
+    }
+
+    private double obtenerPrecioTradicional() {
+        return 77.18;
+    }
+}
