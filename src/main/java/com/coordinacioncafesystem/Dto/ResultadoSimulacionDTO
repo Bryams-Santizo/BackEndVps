@@ -1,0 +1,12 @@
+package com.coordinacioncafesystem.Dto;
+
+public class ResultadoSimulacionDTO {
+    public double pesoFinal; // Después de mermas
+    public double inversionPuestaPunto; // TecNM (GNSS, Suelo, Cata)
+    public double costoLogisticaTotal; // Fletes, Aduana, Certificados
+    public double costoEmpaqueTotal;
+    public double utilidadTradicional; // Escenario A
+    public double utilidadADICAM; // Escenario B (Neto)
+    public String viabilidad; // Verde, Amarillo, Rojo
+    public String sugerenciaRuta;
+}
