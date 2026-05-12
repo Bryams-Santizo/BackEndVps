@@ -50,7 +50,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/api/bolsa/**").permitAll()
-                .requestMatchers("/api/simulador/**").permitAll()
+
+                                   // Simulador: permitir todos los métodos HTTP
+.requestMatchers(HttpMethod.GET,     "/api/simulador/**").permitAll()
+.requestMatchers(HttpMethod.POST,    "/api/simulador/**").permitAll()
+.requestMatchers(HttpMethod.PUT,     "/api/simulador/**").permitAll()
+.requestMatchers(HttpMethod.DELETE,  "/api/simulador/**").permitAll()
+.requestMatchers(HttpMethod.PATCH,   "/api/simulador/**").permitAll()
+.requestMatchers(HttpMethod.OPTIONS, "/api/simulador/**").permitAll()
+
+// Si deseas permitir también HEAD (opcional)
+.requestMatchers(HttpMethod.HEAD,    "/api/simulador/**").permitAll()
+            
 
                 // =====================
                 // SWAGGER / DOCS
