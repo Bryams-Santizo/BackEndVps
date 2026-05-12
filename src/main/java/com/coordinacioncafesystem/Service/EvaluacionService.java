@@ -7,7 +7,7 @@ import com.coordinacioncafesystem.Repository.CertificacionRepository;
 import com.coordinacioncafesystem.Repository.ProductorRepository;
 import com.coordinacioncafesystem.Repository.ResultadoEvaluacionRepository;
 
-
+import com.itextpdf.text.Image;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -65,6 +65,46 @@ public class EvaluacionService {
         try {
             PdfWriter.getInstance(document, out);
             document.open();
+
+            try {
+                Image logoTecnm = Image.getInstance("src/main/resources/static/Imegenes/tecnm.jpg");
+                Image logoItfc = Image.getInstance("src/main/resources/static/Imegenes/itfc.png");
+                Image logoAdicam = Image.getInstance("src/main/resources/static/Imegenes/adicam.png");
+
+                // Ajustar tamaño uniforme
+                logoTecnm.scaleToFit(100, 60);
+                logoItfc.scaleToFit(100, 60);
+                logoAdicam.scaleToFit(100, 60);
+
+                // Crear tabla de 3 columnas
+                com.itextpdf.text.pdf.PdfPTable tabla = new com.itextpdf.text.pdf.PdfPTable(3);
+                tabla.setWidthPercentage(100);
+                tabla.setSpacingAfter(10f);
+
+                // Quitar bordes
+                com.itextpdf.text.pdf.PdfPCell celda1 = new com.itextpdf.text.pdf.PdfPCell(logoTecnm);
+                com.itextpdf.text.pdf.PdfPCell celda2 = new com.itextpdf.text.pdf.PdfPCell(logoItfc);
+                com.itextpdf.text.pdf.PdfPCell celda3 = new com.itextpdf.text.pdf.PdfPCell(logoAdicam);
+
+                celda1.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+                celda2.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+                celda3.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+
+                // Centrar dentro de cada celda
+                celda1.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celda2.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celda3.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+                // Agregar a la tabla
+                tabla.addCell(celda1);
+                tabla.addCell(celda2);
+                tabla.addCell(celda3);
+
+                document.add(tabla);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             Font fontTitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, BaseColor.BLUE);
             Paragraph titulo = new Paragraph("Reporte de Certificacion ADICAM", fontTitulo);
