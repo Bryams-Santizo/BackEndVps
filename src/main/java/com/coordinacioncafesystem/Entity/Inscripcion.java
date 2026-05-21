@@ -13,45 +13,96 @@ public class Inscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String nombreAlumno;
+
+    @Column(columnDefinition = "TEXT")
     private String emailAlumno;
+
+    @Column(columnDefinition = "TEXT")
     private String telefonoAlumno;
 
     // PENDIENTE, ACEPTADO, etc.
+    @Column(columnDefinition = "TEXT")
     private String estado;
 
     private LocalDateTime fechaSolicitud;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "capacitacion_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // evita problemas lazy
+    @JsonIgnoreProperties({
+            "inscripciones",
+            "hibernateLazyInitializer",
+            "handler"
+    })
     private Capacitacion capacitacion;
 
     @PrePersist
     public void prePersist() {
-        if (this.fechaSolicitud == null) this.fechaSolicitud = LocalDateTime.now();
-        if (this.estado == null) this.estado = "PENDIENTE";
+        if (this.fechaSolicitud == null) {
+            this.fechaSolicitud = LocalDateTime.now();
+        }
+
+        if (this.estado == null) {
+            this.estado = "PENDIENTE";
+        }
     }
 
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // GETTERS Y SETTERS
 
-    public String getNombreAlumno() { return nombreAlumno; }
-    public void setNombreAlumno(String nombreAlumno) { this.nombreAlumno = nombreAlumno; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getEmailAlumno() { return emailAlumno; }
-    public void setEmailAlumno(String emailAlumno) { this.emailAlumno = emailAlumno; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getTelefonoAlumno() { return telefonoAlumno; }
-    public void setTelefonoAlumno(String telefonoAlumno) { this.telefonoAlumno = telefonoAlumno; }
+    public String getNombreAlumno() {
+        return nombreAlumno;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public void setNombreAlumno(String nombreAlumno) {
+        this.nombreAlumno = nombreAlumno;
+    }
 
-    public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) { this.fechaSolicitud = fechaSolicitud; }
+    public String getEmailAlumno() {
+        return emailAlumno;
+    }
 
-    public Capacitacion getCapacitacion() { return capacitacion; }
-    public void setCapacitacion(Capacitacion capacitacion) { this.capacitacion = capacitacion; }
+    public void setEmailAlumno(String emailAlumno) {
+        this.emailAlumno = emailAlumno;
+    }
+
+    public String getTelefonoAlumno() {
+        return telefonoAlumno;
+    }
+
+    public void setTelefonoAlumno(String telefonoAlumno) {
+        this.telefonoAlumno = telefonoAlumno;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public LocalDateTime getFechaSolicitud() {
+        return fechaSolicitud;
+    }
+
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+        this.fechaSolicitud = fechaSolicitud;
+    }
+
+    public Capacitacion getCapacitacion() {
+        return capacitacion;
+    }
+
+    public void setCapacitacion(Capacitacion capacitacion) {
+        this.capacitacion = capacitacion;
+    }
 }
