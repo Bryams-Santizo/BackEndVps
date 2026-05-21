@@ -36,105 +36,43 @@ public class CsimuladorService {
 
     public ResultadoSimulacionDTO calcular(Csimulador req) {
         ResultadoSimulacionDTO res = new ResultadoSimulacionDTO();
-
-        // --- PUNTO 3: VOLUMEN Y MERMAS ---
-        double pesoInput = req.getUnidadVolumen().equalsIgnoreCase("quintal") ?
-                req.getVolumenEntrada() * 46 : req.getVolumenEntrada();
+        double pesoInput = req.getUnidadVolumen().equalsIgnoreCase("quintal") ? req.getVolumenEntrada() * 46 : req.getVolumenEntrada();
+        double factorEscala = pesoInput / 1000.0;
         double pesoActual = pesoInput;
 
+        // Mermas según matriz
         if ("Pergamino".equalsIgnoreCase(req.getEstadoInicial())) {
-            pesoActual = pesoActual * 0.80;
-        }
-        if ("Tostado".equalsIgnoreCase(req.getPresentacionVenta())) {
-            pesoActual = pesoActual * 0.82;
+            if ("Oro".equalsIgnoreCase(req.getPresentacionVenta())) pesoActual *= 0.80;
+            else if ("Tostado".equalsIgnoreCase(req.getPresentacionVenta())) pesoActual *= 0.656;
+            else if ("Molido".equalsIgnoreCase(req.getPresentacionVenta())) pesoActual *= 0.640;
         }
         res.pesoFinal = pesoActual;
 
-        // --- PUNTO 2: INVERSIÓN PUESTA A PUNTO ---
-        double inversionTec = 0;
-        if ("No".equalsIgnoreCase(req.getTieneGNSS())) inversionTec += 1500;
-        if ("No".equalsIgnoreCase(req.getTieneSuelo())) inversionTec += 1500;
-        if ("Especialidad".equalsIgnoreCase(req.getSegmento()))
-            inversionTec += 1900;
-        res.inversionPuestaPunto = inversionTec;
+        // Inversión
+        res.inversionPuestaPunto = ("No".equalsIgnoreCase(req.getTieneGNSS()) ? 1500 : 0) +
+                ("No".equalsIgnoreCase(req.getTieneSuelo()) ? 1500 : 0) +
+                ("Especialidad".equalsIgnoreCase(req.getSegmento()) ? 1900 : 0);
 
-        // --- PUNTO 3: EMPAQUES ---
-        double costoEmpaque = 0;
-        if ("Tostado".equalsIgnoreCase(req.getPresentacionVenta())) {
+        // Costos Industriales
+        res.costoTrilla = ("Oro".equalsIgnoreCase(req.getPresentacionVenta()) || "Tostado".equalsIgnoreCase(req.getPresentacionVenta()) || "Molido".equalsIgnoreCase(req.getPresentacionVenta())) ? 2400.0 * factorEscala : 0;
+        res.costoTostado = ("Tostado".equalsIgnoreCase(req.getPresentacionVenta()) || "Molido".equalsIgnoreCase(req.getPresentacionVenta())) ? 6400.0 * factorEscala : 0;
+        res.costoMolido = ("Molido".equalsIgnoreCase(req.getPresentacionVenta())) ? 1968.0 * factorEscala : 0;
 
-            costoEmpaque = pesoActual * 15;
+        // Logística
+        res.costoFitosanitarios = ("Pergamino".equalsIgnoreCase(req.getEstadoInicial()) || "Oro".equalsIgnoreCase(req.getEstadoInicial())) ? 1200.0 * factorEscala : 0;
+        res.costoEmbalajeLiner = ("Pergamino".equalsIgnoreCase(req.getEstadoInicial()) || "Oro".equalsIgnoreCase(req.getEstadoInicial())) ? 1428.57 * factorEscala : 0;
+        res.costoEmpacadoEtiquetado = ("Tostado".equalsIgnoreCase(req.getPresentacionVenta()) || "Molido".equalsIgnoreCase(req.getPresentacionVenta())) ? 3280.0 * factorEscala : 0;
 
-            // maquila adicional
-            double maquila = (req.getCostoMaquila() != null)
-                    ? req.getCostoMaquila()
-                    : 0;
+        double flete = (req.getFleteTerrestre() != null) ? req.getFleteTerrestre() : 15000;
+        double exportacion = "Internacional".equalsIgnoreCase(req.getMercadoObjetivo()) ? (7500 + 200 + 717) : 0;
 
-            costoEmpaque += pesoActual * maquila;
+        res.costoEmpaqueTotal = res.costoEmpacadoEtiquetado + (res.costoEmbalajeLiner > 0 ? 0 : 0); // Ajusta según tu lógica de empaque
+        res.costoLogisticaTotal = flete + exportacion + res.costoFitosanitarios + res.costoEmbalajeLiner + res.costoEmpacadoEtiquetado + res.costoTrilla + res.costoTostado + res.costoMolido;
 
-        }
-        else {
-
-            double numSacos = Math.ceil(pesoActual / 69);
-
-            // YUTE BASE
-            costoEmpaque = numSacos * 45;
-
-            // SOLO EXPORTACIÓN PREMIUM/ESPECIALIDAD
-            if ("Internacional".equalsIgnoreCase(req.getMercadoObjetivo())
-                    &&
-                    ("Especialidad".equalsIgnoreCase(req.getSegmento())
-                            || "Premium".equalsIgnoreCase(req.getSegmento()))) {
-
-                costoEmpaque += numSacos * 100;
-            }
-        }
-
-        res.costoEmpaqueTotal = costoEmpaque;
-
-        // --- PUNTO 4: LOGÍSTICA ---
-        double flete = (req.getFleteTerrestre() != null) ? req.getFleteTerrestre() : 0;
-        double gastosSalida = flete;
-
-        if ("Internacional".equalsIgnoreCase(req.getMercadoObjetivo())) {
-            gastosSalida += 7500 + 200 + 717;
-        }
-        res.costoLogisticaTotal = gastosSalida;
-
-        if ("Veracruz".equalsIgnoreCase(req.getPuntoSalida())) {
-            res.sugerenciaRuta = "Ruta Transatlántica vía Puerto de Veracruz";
-        }
-        else if ("Lázaro Cárdenas".equalsIgnoreCase(req.getPuntoSalida())) {
-            res.sugerenciaRuta = "Ruta Pacífico vía Puerto Lázaro Cárdenas";
-        }
-        else {
-            res.sugerenciaRuta = "Conexión Terrestre vía Nuevo Laredo (USA)";
-        }
-
-        // --- PUNTO 5: DASHBOARD ---
-
-        double precioKgADICAM = obtenerPrecioPorSegmento(req.getSegmento());
-        double ingresoBrutoADICAM = pesoActual * precioKgADICAM;
-
-        res.utilidadTradicional = pesoInput * obtenerPrecioTradicional();
-
-        res.utilidadADICAM =
-                ingresoBrutoADICAM
-                        - inversionTec
-                        - costoEmpaque
-                        - gastosSalida;
-        // Semáforo
-        boolean faltaGNSS = "No".equalsIgnoreCase(req.getTieneGNSS());
-        boolean faltaSuelo = "No".equalsIgnoreCase(req.getTieneSuelo());
-
-        if (faltaGNSS && faltaSuelo) {
-            res.viabilidad = "Rojo";
-        }
-        else if (faltaGNSS || faltaSuelo) {
-            res.viabilidad = "Amarillo";
-        }
-        else {
-            res.viabilidad = "Verde";
-        }
+        // Final
+        res.utilidadTradicional = 90000.0 * factorEscala;
+        res.utilidadADICAM = (pesoActual * obtenerPrecioPorSegmento(req.getSegmento())) - (res.inversionPuestaPunto + res.costoLogisticaTotal);
+        res.viabilidad = res.utilidadADICAM > 30000 ? "Verde" : (res.utilidadADICAM > 0 ? "Amarillo" : "Rojo");
 
         return res;
     }
