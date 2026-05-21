@@ -1,6 +1,6 @@
 package com.coordinacioncafesystem.Entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -13,20 +13,14 @@ public class Capacitacion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // =========================
-    // CAMPOS TEXTO LARGO
-    // =========================
-
     @Column(columnDefinition = "TEXT")
     private String nombre;
 
-    @Column(columnDefinition = "TEXT")
     private String tipo;
 
     @Column(columnDefinition = "TEXT")
     private String tipoOtro;
 
-    @Column(columnDefinition = "TEXT")
     private String duracion;
 
     @Column(columnDefinition = "TEXT")
@@ -59,27 +53,14 @@ public class Capacitacion {
     @Column(columnDefinition = "TEXT")
     private String instructores;
 
-    // =========================
-    // ESTADO
-    // =========================
-
     private boolean activo = true;
 
-    // =========================
-    // RELACIONES
-    // =========================
-
-    @OneToMany(
-            mappedBy = "capacitacion",
-            cascade = CascadeType.REMOVE,
-            orphanRemoval = true
-    )
-    @JsonManagedReference
+    // 🔥 IMPORTANTE
+    @OneToMany(mappedBy = "capacitacion", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
     private List<Inscripcion> inscripciones;
 
-    // =========================
-    // GETTERS AND SETTERS
-    // =========================
+    // GETTERS Y SETTERS
 
     public Long getId() {
         return id;
