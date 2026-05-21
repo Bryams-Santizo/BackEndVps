@@ -1,6 +1,9 @@
 package com.coordinacioncafesystem.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "capacitaciones")
@@ -9,9 +12,11 @@ public class Capacitacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(columnDefinition = "TEXT")
     private String nombre;
     private String tipo;
+
+    @Column(columnDefinition = "TEXT")
     private String tipoOtro;
     private String duracion;
 
@@ -21,6 +26,7 @@ public class Capacitacion {
     @Column(columnDefinition = "TEXT")
     private String competencias;
 
+    @Column(columnDefinition = "TEXT")
     private String publicoObjetivo;
 
     @Column(columnDefinition = "TEXT")
@@ -29,12 +35,22 @@ public class Capacitacion {
     private String costo;
     private String emisor;
     private String disponibilidad;
+
+    @Column(columnDefinition = "TEXT")
     private String materiales;
+
+    @Column(columnDefinition = "TEXT")
     private String criteriosevaluacion;
+
+    @Column(columnDefinition = "TEXT")
     private String instructores;
 
     private boolean activo = true;
 
+
+    @OneToMany(mappedBy = "capacitacion", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Inscripcion> inscripciones;
     //Getter and Setter
 
 
@@ -165,5 +181,13 @@ public class Capacitacion {
 
     public void setInstructores(String instructores) {
         this.instructores = instructores;
+    }
+
+    public List<Inscripcion> getInscripciones() {
+        return inscripciones;
+    }
+
+    public void setInscripciones(List<Inscripcion> inscripciones) {
+        this.inscripciones = inscripciones;
     }
 }
