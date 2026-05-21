@@ -12,15 +12,24 @@ public class Capacitacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // =========================
+    // CAMPOS TEXTO LARGO
+    // =========================
+
     @Column(columnDefinition = "TEXT")
     private String nombre;
+
+    @Column(columnDefinition = "TEXT")
     private String tipo;
 
     @Column(columnDefinition = "TEXT")
     private String tipoOtro;
+
+    @Column(columnDefinition = "TEXT")
     private String duracion;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String requisitos;
 
     @Column(columnDefinition = "TEXT")
@@ -32,8 +41,13 @@ public class Capacitacion {
     @Column(columnDefinition = "TEXT")
     private String contenido;
 
+    @Column(columnDefinition = "TEXT")
     private String costo;
+
+    @Column(columnDefinition = "TEXT")
     private String emisor;
+
+    @Column(columnDefinition = "TEXT")
     private String disponibilidad;
 
     @Column(columnDefinition = "TEXT")
@@ -45,14 +59,27 @@ public class Capacitacion {
     @Column(columnDefinition = "TEXT")
     private String instructores;
 
+    // =========================
+    // ESTADO
+    // =========================
+
     private boolean activo = true;
 
+    // =========================
+    // RELACIONES
+    // =========================
 
-    @OneToMany(mappedBy = "capacitacion", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "capacitacion",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
     @JsonManagedReference
     private List<Inscripcion> inscripciones;
-    //Getter and Setter
 
+    // =========================
+    // GETTERS AND SETTERS
+    // =========================
 
     public Long getId() {
         return id;
@@ -150,15 +177,6 @@ public class Capacitacion {
         this.disponibilidad = disponibilidad;
     }
 
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
-
-
     public String getMateriales() {
         return materiales;
     }
@@ -181,6 +199,14 @@ public class Capacitacion {
 
     public void setInstructores(String instructores) {
         this.instructores = instructores;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public List<Inscripcion> getInscripciones() {
